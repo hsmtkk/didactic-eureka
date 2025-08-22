@@ -116,11 +116,11 @@ def get_first_second_month_record(
 
 
 def log_records(df: pandas.DataFrame, first_month: str, second_month) -> None:
-    logger.info("第1限月")
+    logger.info(f"第1限月 {first_month}")
     filtered_df = df[df["限月"] == first_month]
     for i, record in filtered_df.iterrows():
         logger.info(i, extra=record.to_dict())
-    logger.info("第2限月")
+    logger.info(f"第2限月 {second_month}")
     filtered_df = df[df["限月"] == second_month]
     for i, record in filtered_df.iterrows():
         logger.info(i, extra=record.to_dict())

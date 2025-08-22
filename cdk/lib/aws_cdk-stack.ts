@@ -12,10 +12,16 @@ export class DidacticEurekaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    const layer = new lambda_python_alpha.PythonLayerVersion(this, "layer", {
+      compatibleRuntimes: [lambda.Runtime.PYTHON_3_13],
+      entry: "../layer",
+    });
+
     const update_data = new lambda_python_alpha.PythonFunction(this, "update_data", {
       entry: "../lambda",
       handler: "handler",
       index: "update_data.py",
+      layers: [layer],
       loggingFormat: lambda.LoggingFormat.JSON,
       runtime: lambda.Runtime.PYTHON_3_13,
       timeout: cdk.Duration.seconds(10),

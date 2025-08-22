@@ -41,16 +41,6 @@ class OptionData:
     second_month_put_iv: float
     second_month_call_iv: float
 
-    def __dict__(self) -> dict:
-        return {
-            "first_month_atm": self.first_month_atm,
-            "second_month_atm": self.second_month_atm,
-            "first_month_put_iv": self.first_month_put_iv,
-            "first_month_call_iv": self.first_month_call_iv,
-            "second_month_put_iv": self.second_month_put_iv,
-            "second_month_call_iv": self.second_month_call_iv,
-        }
-
 
 def handler(event, context):
     logger.info("event", extra=event)
@@ -101,7 +91,7 @@ def parse_csv(csv_path: os.PathLike):
         second_month_put_iv,
         second_month_call_iv,
     )
-    logger.info("option data", extra=dict(option_data))
+    logger.info("option data", extra=dataclasses.asdict(option_data))
     put_metric(option_data)
 
 

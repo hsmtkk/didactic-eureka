@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
 import * as cloudwatch_actions from "aws-cdk-lib/aws-cloudwatch-actions";
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambda_python_alpha from "@aws-cdk/aws-lambda-python-alpha";
 import * as scheduler from "aws-cdk-lib/aws-scheduler";
@@ -27,6 +28,8 @@ export class DidacticEurekaStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(10),
       tracing: lambda.Tracing.ACTIVE,
     });
+
+    update_data.role!.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccessV2"));
 
     const lambda_scheduler = new scheduler.Schedule(this, "scheduler", {
       schedule: scheduler.ScheduleExpression.cron({

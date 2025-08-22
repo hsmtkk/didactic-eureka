@@ -73,7 +73,7 @@ def download_csv(csv_link: str) -> os.PathLike:
 
 def parse_csv(csv_path: os.PathLike):
     df = pandas.read_csv(csv_path, encoding="shift_jis", skiprows=2)
-    print(df)
+    output_nikkei225_records(df)
     (first_month_record, second_month_record) = get_first_second_month_record(df)
     first_month = first_month_record["限月"]
     second_month = first_month_record["限月"]
@@ -94,6 +94,10 @@ def parse_csv(csv_path: os.PathLike):
     logger.info("option data", extra=dataclasses.asdict(option_data))
     put_metric(option_data)
 
+def output_nikkei225_records(df: pandas.DataFrame) -> None:
+    nikkei225_df = df[df["原資産名称"] == "日経225"]
+    for (i, x) in enumerate(nikkei225_df):
+        logger.info(i, extra=x.to_dict())
 
 def get_first_second_month_record(
     df: pandas.DataFrame,

@@ -37,6 +37,7 @@ export class DidacticEurekaStack extends cdk.Stack {
         hour: "*/6",
         month: "*",
         weekDay: "1-5",
+        timeZone: cdk.TimeZone.ASIA_TOKYO,
       }),
       target: new scheduler_targets.LambdaInvoke(update_data),
       timeWindow: scheduler.TimeWindow.flexible(cdk.Duration.minutes(15)),

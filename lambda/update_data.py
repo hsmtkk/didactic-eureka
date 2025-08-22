@@ -73,16 +73,27 @@ def download_csv(csv_link: str) -> os.PathLike:
 
 def parse_csv(csv_path: os.PathLike):
     df = pandas.read_csv(csv_path, encoding="shift_jis", skiprows=2)
-    output_nikkei225_records(df)
-    (first_month_record, second_month_record) = get_first_second_month_record(df)
+    nikkei225_df = df[df["原資産名称"] == "日経225"]
+    (first_month_record, second_month_record) = get_first_second_month_record(
+        nikkei225_df
+    )
     first_month = first_month_record["限月"]
-    second_month = first_month_record["限月"]
+    second_month = second_month_record["限月"]
+    log_records(nikkei225_df, first_month, second_month)
     first_month_atm = round250(first_month_record["清算価格"])
     second_month_atm = round250(second_month_record["清算価格"])
-    first_month_put_iv = get_iv(df, PUT_CALL.PUT, first_month, first_month_atm)
-    first_month_call_iv = get_iv(df, PUT_CALL.CALL, first_month, first_month_atm)
-    second_month_put_iv = get_iv(df, PUT_CALL.PUT, second_month, second_month_atm)
-    second_month_call_iv = get_iv(df, PUT_CALL.CALL, second_month, second_month_atm)
+    first_month_put_iv = get_iv(
+        nikkei225_df, PUT_CALL.PUT, first_month, first_month_atm
+    )
+    first_month_call_iv = get_iv(
+        nikkei225_df, PUT_CALL.CALL, first_month, first_month_atm
+    )
+    second_month_put_iv = get_iv(
+        nikkei225_df, PUT_CALL.PUT, second_month, second_month_atm
+    )
+    second_month_call_iv = get_iv(
+        nikkei225_df, PUT_CALL.CALL, second_month, second_month_atm
+    )
     option_data = OptionData(
         first_month_atm,
         second_month_atm,
@@ -94,10 +105,6 @@ def parse_csv(csv_path: os.PathLike):
     logger.info("option data", extra=dataclasses.asdict(option_data))
     put_metric(option_data)
 
-def output_nikkei225_records(df: pandas.DataFrame) -> None:
-    nikkei225_df = df[df["原資産名称"] == "日経225"]
-    for (i, x) in enumerate(nikkei225_df):
-        logger.info(i, extra=x.to_dict())
 
 def get_first_second_month_record(
     df: pandas.DataFrame,
@@ -106,6 +113,17 @@ def get_first_second_month_record(
     first_month_record = future_mini_df.iloc[0]
     second_month_record = future_mini_df.iloc[1]
     return (first_month_record, second_month_record)
+
+
+def log_records(df: pandas.DataFrame, first_month: str, second_month) -> None:
+    logger.info("第1限月")
+    filtered_df = df[df["限月"] == first_month]
+    for i, record in filtered_df.iterrows():
+        logger.info(i, extra=record.to_dict())
+    logger.info("第2限月")
+    filtered_df = df[df["限月"] == second_month]
+    for i, record in filtered_df.iterrows():
+        logger.info(i, extra=record.to_dict())
 
 
 def round250(value: float) -> int:
@@ -117,7 +135,6 @@ def get_iv(df: pandas.DataFrame, put_call: PUT_CALL, month: str, atm: int) -> fl
         (df["PUT/CAL"] == put_call.jpx_str())
         & (df["限月"] == month)
         & (df["権利行使価格"] == atm)
-        & (df["原資産名称"] == "日経225")
     ]
     return float(filtered_df["ボラティリティ"].iloc[0])
 
